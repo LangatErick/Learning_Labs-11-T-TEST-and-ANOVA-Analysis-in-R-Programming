@@ -1,0 +1,80 @@
+---
+title: "ANOVA-ANALYSIS OF VARAINCE"
+author: "ERICK@"
+date: "2024-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ANOVA-ANALYSIS OF VARAINCE
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(forcats)
+library(gapminder)
+library(report)
+```
+
+```{r}
+#data
+# data("msleep")
+df <- msleep
+head(df)
+# dim(df)
+colnames(df)
+# df %>% pull(name) 
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+df1 <- df %>% select(vore, sleep_rem) %>% 
+        drop_na()
+aov_mod <- aov(sleep_rem~vore, data = df1)
+summary(aov_mod)
+report(aov_mod)
+#p_value is less than (0.05)
+#reject H0(MEANS ARE THE SAME)
+```
+
+```{r}
+#create a data frame
+
+gapdata <- gapminder %>%  
+                filter(year==2007 &
+                  continent %in% c('Americas', 'Europe', 'Asia')) %>% 
+                select(continent, lifeExp)
+#Take a look at the distribution of means
+gapdata %>% group_by(continent) %>% 
+      summarise(means=mean(lifeExp)) %>% 
+      arrange(desc(means))
+```
+
+```{r}
+# Research Question: Is the life expectancy 
+# in this three continents equal????
+# Hypothesis
+# H0:Mean Life Expectancy is the same
+# H1:Mean Life Expectancy is not the same  
+
+#Observation
+#Create ANOVA MODEL
+aov_mod1 <- aov(lifeExp~continent, data = gapdata)
+summary(aov_mod1)
+report(aov_mod1)
+
+
+# Observation:
+# The main effect of continent is statistically significant and large (F(2, 85) =11.63, p < .001; Eta2 = 0.21, 95% CI [0.09, 1.00])
+```
+
+```{r}
+#is this significance being driven by a particular continent???
+
+TukeyHSD(aov_mod1) #%>% plot()
+```

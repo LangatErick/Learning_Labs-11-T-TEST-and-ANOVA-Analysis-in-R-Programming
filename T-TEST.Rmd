@@ -1,0 +1,85 @@
+---
+title: "T TEST"
+author: "ERICK@"
+date: "2024-04-08"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## T TEST
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(report)
+```
+
+```{r}
+df <- starwars
+df<- df %>% select(sex, height) %>% 
+            filter( sex %in% c('male', 'female')) %>% 
+        drop_na(height)
+
+t.test(height~sex, data = df) %>% report()
+```
+
+```{r warning=FALSE, message=FALSE}
+library(gapminder)#dataset
+library(patchwork)
+
+```
+
+### Single Sample T TEST
+
+H0:Mean life expectancy is 50 years
+
+H1: mean life expectancy is not 50 years
+
+Observation: mean of x 48.86533
+
+```{r}
+gapminder %>%  filter(continent=="Africa") %>% 
+      select(lifeExp) %>% 
+      t.test(mu=50, conf.level = TRUE)
+# Observation: mean of x   48.86533 
+# p-value = 0.002038 Reject H0, #true mean is not equal to 50
+test <- gapminder %>%  filter(continent=="Africa") %>% 
+      select(lifeExp) %>% 
+      t.test(mu=50)
+report(test)
+```
+
+### Two sided T-TEST for difference of means
+
+```{r}
+df <- gapminder %>% select(continent, lifeExp) %>% 
+      filter(continent %in% c('Africa', 'Europe'))
+test1 <- t.test(lifeExp~continent, alternative='two.sided', data = df)
+test1 
+
+report(test1)
+```
+
+### One Sided T-TEST
+
+```{r}
+df1 <- gapminder %>% select(country, lifeExp) %>% 
+      filter(country %in% c('Ireland', 'Switzerland'))
+test2 <- t.test(lifeExp~country, alternative='less', data = df1)
+test2 
+
+report(test2)
+```
+
+### Paired T-TEST
+
+```{r}
+df2 <- gapminder %>% filter(year %in% c(1957, 2007),
+                            continent=='Africa') %>% 
+          mutate(year=factor(year, levels=c(2007, 1957)))
+
+test3 <- t.test(lifeExp~year, data = df2, paired=TRUE)
+test3 %>% report()
+```
